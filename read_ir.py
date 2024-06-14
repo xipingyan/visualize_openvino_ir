@@ -98,7 +98,7 @@ class OV_IR:
                 parent_layers.append(edge.from_layer)
         return parent_layers
 
-    def get_son_edgs(self, layer_id):
+    def get_son_ids(self, layer_id):
         son_layers=[]
         for edge in self.my_edges:
             if edge.from_layer == layer_id:
@@ -111,8 +111,18 @@ class OV_IR:
     def get_layers(self) -> list:
         return self.my_layers
 
-    def get_layer(self, layer_id) -> Layer:
+    def get_edges(self) ->list[Edge]:
+        return self.my_edges
+
+    # Get layer via layer id
+    def get_layer_via_id(self, layer_id) -> Layer:
         for layer in self.my_layers:
             if layer.id == layer_id:
+                return layer
+        return None
+    # Get layer via layer name
+    def get_layer_via_name(self, layer_name) -> Layer:
+        for layer in self.my_layers:
+            if layer.name == layer_name:
                 return layer
         return None

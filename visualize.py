@@ -9,45 +9,82 @@ if platform.system() == 'Windows':
 def print_splitter():
     print("=======================================================")
 
-def visualize_via_name(ir:OV_IR, layer_name=None, top=3, bottom=1):
-    pass
-
-def visualize_via_id(ir:OV_IR, layer_id=None, top=3, bottom=1):
+def draw_graph(all_nodes:list[Layer], all_edges:list):
     dot = graphviz.Digraph()
+    for layer in all_nodes:
+        show_name=layer.type+":"+layer.id+"\n"
+        for output in layer.output:
+            show_name=show_name+str(output['shape'])+":"+output["element_type"]+"\n"
 
-    cur_layer = ir.get_layer(layer_id)
+        dot.node(layer.id, show_name)
+    for parent_id, cur_id, name in all_edges:
+        dot.edge(parent_id, cur_id, name)
+    dot.view()
+
+def visualize_via_name(ir:OV_IR, layer_name=None, top=3, bottom=1, ignore_const=False):
+    layer = ir.get_layer_via_name(layer_name)
+    if layer is None:
+        print("Error: can't find layer via layer name:", layer_name)
+        return None
+    else:
+        visualize_via_id(ir, layer.id, top, bottom, ignore_const)
+
+def visualize_via_id(ir:OV_IR, layer_id=None, top=3, bottom=1, ignore_const=False):
+    all_nodes=set()
+    all_edges=set()
+
+    cur_layer = ir.get_layer_via_id(layer_id)
     if cur_layer is None:
         print(f"Can't find layer_id[{layer_id}] in IR. Exit.")
         return
 
-    # Draw current node.
-    dot.node(cur_layer.id, cur_layer.type)
+    # Grab current node.
+    if (ignore_const and cur_layer.type == 'Const') is False:
+        all_nodes.add(cur_layer)
     pair_edges=[]
     for parent_id in ir.get_parent_ids(layer_id=layer_id):
         # node pair (parent id -> current id)
-        pair_edges.append((parent_id, cur_layer.id))
+        if (ignore_const and ir.get_layer_via_id(parent_id).type == 'Const') is False:
+            pair_edges.append((parent_id, cur_layer.id))
 
-    # Draw parent
+    # Grab parent
     for t in range(top):
         next_ids=[]
         for parent_id, current_id in pair_edges:
-            parent_layer = ir.get_layer(parent_id)
-            dot.node(parent_layer.id, parent_layer.type)
-            dot.edge(parent_layer.id, current_id, "")
+            parent_layer = ir.get_layer_via_id(parent_id)
+            print(ignore_const, parent_layer.type)
+            if (ignore_const and parent_layer.type == 'Const') is False:
+                all_nodes.add(parent_layer)
+            
+            if (ignore_const and ir.get_layer_via_id(parent_layer.id).type == 'Const') is False:
+                all_edges.add((parent_layer.id, current_id, ""))
 
             for new_parent_id in ir.get_parent_ids(parent_id):
                 next_ids.append((new_parent_id, parent_id))
         pair_edges=next_ids
+    
+    # Grap son
 
-    # dot.render('graph', view=True)
-    dot.view()
+    # Draw.
+    draw_graph(all_nodes, all_edges)
 
+def visualize_all(ir:OV_IR, ignore_const=False):
+    all_nodes=set()
+    all_edges=set()
+    for layer in ir.get_layers():
+        all_nodes.add(layer)
+    for edge in ir.get_edges():
+        all_edges.add((edge.from_layer, edge.to_layer, ""))
 
-def visualize(ir:OV_IR, layer_name=None, layer_id=None, top=3, bottom=1):
+    # Draw.
+    draw_graph(all_nodes, all_edges)
+
+def visualize(ir:OV_IR, layer_name=None, layer_id=None, top=3, bottom=1, ignore_const=False):
     print('Call:', __name__)
     print(layer_name)
     if layer_name is not None:
-        visualize_via_name(ir, layer_name=layer_name, top=top, bottom=bottom)
+        visualize_via_name(ir, layer_name=layer_name, top=top, bottom=bottom, ignore_const=ignore_const)
     elif layer_id is not None:
-        visualize_via_id(ir, layer_id=layer_id, top=top, bottom=bottom)
-    pass
+        visualize_via_id(ir, layer_id=layer_id, top=top, bottom=bottom, ignore_const=ignore_const)
+    else:
+        visualize_all(ir, ignore_const=ignore_const)
