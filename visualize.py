@@ -11,6 +11,7 @@ def print_splitter():
 
 def visualize_via_name(ir:OV_IR, layer_name=None, top=3, bottom=1):
     pass
+
 def visualize_via_id(ir:OV_IR, layer_id=None, top=3, bottom=1):
     dot = graphviz.Digraph()
 
@@ -18,23 +19,29 @@ def visualize_via_id(ir:OV_IR, layer_id=None, top=3, bottom=1):
     if cur_layer is None:
         print(f"Can't find layer_id[{layer_id}] in IR. Exit.")
         return
-    
-    dot.node(cur_layer.id, cur_layer.name)
 
-    # Draw top
-    cur_ids=ir.get_parent_edgs(layer_id=layer_id)
-    cur_ids = [[cur_ids[0], layer_id]]
+    # Draw current node.
+    dot.node(cur_layer.id, cur_layer.type)
+    pair_edges=[]
+    for parent_id in ir.get_parent_ids(layer_id=layer_id):
+        # node pair (parent id -> current id)
+        pair_edges.append((parent_id, cur_layer.id))
+
+    # Draw parent
     for t in range(top):
         next_ids=[]
-        for id in cur_ids:
-            cur_layer = ir.get_layer(id[0])
-            dot.node(cur_layer.id, cur_layer.name)
-            dot.edge(cur_layer.id, id[1], "")
-            for x in ir.get_parent_edgs(cur_layer.id):
-                next_ids.append([x, cur_layer.id])
-        cur_ids=next_ids
+        for parent_id, current_id in pair_edges:
+            parent_layer = ir.get_layer(parent_id)
+            dot.node(parent_layer.id, parent_layer.type)
+            dot.edge(parent_layer.id, current_id, "")
 
-    dot.render('graph', view=True)
+            for new_parent_id in ir.get_parent_ids(parent_id):
+                next_ids.append((new_parent_id, parent_id))
+        pair_edges=next_ids
+
+    # dot.render('graph', view=True)
+    dot.view()
+
 
 def visualize(ir:OV_IR, layer_name=None, layer_id=None, top=3, bottom=1):
     print('Call:', __name__)

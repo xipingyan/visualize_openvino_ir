@@ -90,7 +90,8 @@ class OV_IR:
                     my_edge=Edge(edge.attrib)
                     self.my_edges.append(my_edge)
 
-    def get_parent_edgs(self, layer_id):
+    # Get all parent id based on current layer id.
+    def get_parent_ids(self, layer_id):
         parent_layers=[]
         for edge in self.my_edges:
             if edge.to_layer == layer_id:
