@@ -3,7 +3,7 @@ import graphviz
 import os, platform
 
 if platform.system() == 'Windows':
-    os.environ["PATH"] += os.pathsep + os.path.dirname(os.path.abspath(__file__)) + "\python-env\Lib\site-packages\graphviz"
+    os.environ["PATH"] += os.pathsep + "C:\\Program Files\\Graphviz\\bin"
 
 def print_splitter():
     print("=======================================================")

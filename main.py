@@ -11,7 +11,7 @@ def main():
     parser.add_argument("-t", "--top", type=int, default=3, help="Visualize layer number on the top of specific layer.")
     parser.add_argument("-b", "--bottom", type=int, default=1, help="Visualize layer number on the bottom of specific layer.")
     parser.add_argument("-ic", "--ignore_const", action="store_true")
-    parser.add_argument("-hn", "--highlight_nodes", help="Highlight display node with color, input types, split with ',', for example: MatMul,Multiply,FullyConnected")
+    parser.add_argument("-highlight", "--highlight_nodes", help="Highlight display node with color, input types, split with ',', for example: MatMul,Multiply,FullyConnected")
 
     args = parser.parse_args()
 

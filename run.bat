@@ -7,4 +7,4 @@ set model=..\\phi3\\openvino_model.xml
 set layer_name='__module.model.layers.0.self_attn/aten::scaled_dot_product_attention/ScaledDotProductAttention'
 set layer_id=289
 echo "==========================="
-python main.py -m %model% -id %layer_id% --top 2 --bottom 1
+python main.py -m %model% -id %layer_id% --top 10 --bottom 1 --ignore_const -highlight MatMul,Slice
