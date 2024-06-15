@@ -17,3 +17,6 @@ Netron can't visualize large model, just customize a script to display snippet o
 
     <!-- Show graph -->
     python main.py -m $model
+
+    Linux refer: run.sh
+    Windows refer: run.bat

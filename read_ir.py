@@ -54,7 +54,7 @@ class OV_IR:
         self.my_layers=[]
         self.my_edges=[]
         
-        print("Start to read xml:" + self.xml_fn)
+        print("== Start to read xml:" + self.xml_fn)
         tree = ET.parse(self.xml_fn)
         
         # getting the parent tag of the xml document
