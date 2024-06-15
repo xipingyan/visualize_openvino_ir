@@ -6,8 +6,8 @@ from visualize import visualize
 def main():
     parser = argparse.ArgumentParser("")
     parser.add_argument("-m", "--model", help="OpenVINO IR, xml file.", required=True)
-    parser.add_argument("-name", "--layer_name", help="Visualize snippet of Graph based on this layer name.")
     parser.add_argument("-id", "--layer_id", help="Visualize snippet of Graph based on this layer id.")
+    parser.add_argument("-name", "--layer_name", help="Visualize snippet of Graph based on this layer name.")
     parser.add_argument("-t", "--top", type=int, default=3, help="Visualize layer number on the top of specific layer.")
     parser.add_argument("-b", "--bottom", type=int, default=1, help="Visualize layer number on the bottom of specific layer.")
     parser.add_argument("-ic", "--ignore_const", action="store_true")

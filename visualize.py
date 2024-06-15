@@ -77,6 +77,7 @@ def visualize_via_id(ir:OV_IR, layer_id=None, top=3, bottom=1, ignore_const=Fals
         pair_edges=next_ids
     
     # Grap son
+    pair_edges=[]
     next_ids=[]
     for son_id in ir.get_son_ids(layer_id=cur_layer.id):
         # node pair (parent id -> current id)
@@ -91,7 +92,6 @@ def visualize_via_id(ir:OV_IR, layer_id=None, top=3, bottom=1, ignore_const=Fals
             for new_son_id in ir.get_son_ids(son_id):
                 next_ids.append((son_id, new_son_id))
         pair_edges=next_ids
-
 
     # Draw.
     draw_graph(all_nodes, all_edges, highlight_nodes, cur_layer, output=output)
