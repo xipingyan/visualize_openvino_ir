@@ -27,7 +27,7 @@ def draw_graph(all_nodes:list[Layer], all_edges:list, highligt_nodes:list, cur_n
             color = 'lightblue'
             style = 'filled'
         elif layer.type in ["Reorder"]:
-            color = 'lightred'
+            color = 'lightyellow'
             style = 'filled'
 
         dot.node(layer.id, show_name, style=style, color=color)
