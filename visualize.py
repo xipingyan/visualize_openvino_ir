@@ -1,4 +1,4 @@
-from read_ir import OV_IR, Layer, Edge
+from .read_ir import OV_IR, Layer, Edge
 import graphviz
 import os, platform
 

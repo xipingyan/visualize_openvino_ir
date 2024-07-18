@@ -27,6 +27,12 @@ class Layer:
             self.input.append({"shape":shape, "element_type":element_type, "id":id})
         else:
             self.output.append({"shape":shape, "element_type":element_type, "id":id})
+    # Model's inputs
+    def is_Parameter(self):
+        return self.type == "Parameter"
+    # Model's outputs
+    def is_Result(self):
+        return self.type == "Result"
 
 class Edge:
     def __init__(self, attrib) -> None:
@@ -49,7 +55,9 @@ def parse_input_output(sub_layer, my_layer, is_input=True):
         my_layer.add_input_output(shape=my_dims, element_type=my_element_type, id=my_id, is_input=is_input)
 
 class OV_IR:
-    def __init__(self, xml_fn):
+    def __init__(self, xml_fn=None):
+        if xml_fn is None:
+            return
         self.xml_fn = xml_fn
         self.my_layers=[]
         self.my_edges=[]
@@ -83,12 +91,18 @@ class OV_IR:
                             # <port id=...
                             parse_input_output(sub_layer, my_layer, is_input=False)
                     self.my_layers.append(my_layer)
+
             elif net.tag == 'edges':
                 edges = net
                 # ==================================
                 for edge in edges:
                     my_edge=Edge(edge.attrib)
                     self.my_edges.append(my_edge)
+
+    def generate_ir(self, layers:list[Layer], edges:list[Edge]):
+        self.my_edges = edges
+        self.my_layers = layers
+        self.xml_fn = None
 
     # Get all parent id based on current layer id.
     def get_parent_ids(self, layer_id):
@@ -126,3 +140,32 @@ class OV_IR:
             if layer.name == layer_name:
                 return layer
         return None
+
+def genLayer(id, type:str='test_type') -> Layer:
+    return Layer({'id': str(id), 'name': 'ops'+str(id), 'type': type, 'version': 'opset1'})
+def genEdge(from_layer, to_layer, from_port=0, to_port=0):
+    return Edge({'from-layer': str(from_layer), 'to-layer': str(to_layer), 'from-port': str(from_port), 'to-port': str(to_port)})
+# Example:
+def generate_ir_example() -> OV_IR:
+    ir = OV_IR(None)
+    # Parameter: Model input
+    layers = [genLayer(0, 'Parameter'), genLayer(1, 'Parameter')]
+    layers = layers + [ genLayer(id=i+2, type='Test') for i in range(9) ]
+    # Result: Model output
+    layers.append(genLayer(11, 'Result'))
+    # Link nodes via edges
+    edges = [genEdge(0,2),
+             genEdge(1,4),
+             genEdge(2,3),
+             genEdge(3,5),
+             genEdge(4,5),
+             genEdge(5,6),
+             genEdge(5,7),
+             genEdge(6,9),
+             genEdge(6,8),
+             genEdge(7,8),
+             genEdge(9,10),
+             genEdge(8,10),
+             genEdge(10,11)]
+    ir.generate_ir(layers, edges)
+    return ir
