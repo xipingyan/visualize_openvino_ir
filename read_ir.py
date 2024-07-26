@@ -20,6 +20,9 @@ class Layer:
         # output
         self.output=[]
 
+        # flag: -1: means not assign thread id
+        self.thread_id = -1
+
     def add_data(self, shape=None, element_type=None):
         pass
     def add_input_output(self, shape, element_type, id, is_input=True):
@@ -33,6 +36,14 @@ class Layer:
     # Model's outputs
     def is_Result(self):
         return self.type == "Result"
+
+    def assign_thread_id(self, thread_id, print_log=True):
+        self.thread_id = thread_id
+        if print_log:
+            print(f'==== put {self.id}:{self.name}:{self.type} to thread: {thread_id}')
+
+    def have_thread_id(self):
+        return self.thread_id >= 0
 
 class Edge:
     def __init__(self, attrib) -> None:
@@ -140,6 +151,11 @@ class OV_IR:
             if layer.name == layer_name:
                 return layer
         return None
+
+    def assign_thread_id(self, layer_id, thread_id):
+        for layer in self.my_layers:
+            if layer.id == layer_id:
+                layer.assign_thread_id(thread_id, print_log=False)
 
 def genLayer(id, type:str='test_type') -> Layer:
     return Layer({'id': str(id), 'name': 'ops'+str(id), 'type': type, 'version': 'opset1'})
