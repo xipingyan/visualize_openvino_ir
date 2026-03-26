@@ -1,4 +1,7 @@
-from .read_ir import OV_IR, Layer, Edge
+try:
+    from .read_ir import OV_IR, Layer, Edge
+except ImportError:
+    from read_ir import OV_IR, Layer, Edge
 import graphviz
 import os, platform
 
@@ -58,17 +61,22 @@ def visualize_via_id(ir:OV_IR, layer_id=None, top=3, bottom=1, ignore_const=Fals
     if cur_layer is None:
         print(f"Error: Can't find layer_id[{layer_id}] in IR. Exit.")
         return
+    print(f"== Start visualize layer_id[{layer_id}], layer_name[{cur_layer.name}], layer_type[{cur_layer.type}]")
 
     # Grab current node.
     if (ignore_const and cur_layer.type == 'Const') is False:
         all_nodes.add(cur_layer)
     pair_edges=[]
+    # Grab parent
+    print(f"== Grab parent nodes of layer_id[{layer_id}]")
     for parent_id in ir.get_parent_ids(layer_id=layer_id):
         # node pair (parent id -> current id)
         if (ignore_const and ir.get_layer_via_id(parent_id).type == 'Const') is False:
             pair_edges.append((parent_id, cur_layer.id))
+            print(f"    parent_id[{parent_id}] -> layer_id[{layer_id}]")
 
     # Grab parent
+    print(f"== Grab parent nodes of layer_id[{layer_id}] with top={top}")
     for t in range(top):
         next_ids=[]
         for parent_id, current_id in pair_edges:
@@ -79,26 +87,36 @@ def visualize_via_id(ir:OV_IR, layer_id=None, top=3, bottom=1, ignore_const=Fals
 
             for new_parent_id in ir.get_parent_ids(parent_id):
                 next_ids.append((new_parent_id, parent_id))
-        pair_edges=next_ids
+        pair_edges=next_ids.copy()  # Avoid reference issue, make a copy of list.
+        next_ids=[]
     
-    # Grap son
+    # Grab son
+    print(f"== Grab son nodes of layer_id[{layer_id}]")
     pair_edges=[]
     next_ids=[]
     for son_id in ir.get_son_ids(layer_id=cur_layer.id):
         # node pair (parent id -> current id)
         pair_edges.append((cur_layer.id, son_id))
+        # print(f"    layer_id[{layer_id}] -> son_id[{son_id}]")
 
+    print(f"== Grab son nodes of layer_id[{layer_id}] with bottom={bottom}")
     for t in range(bottom):
+        # print(f"    bottom={t+1}, current pair_edges={pair_edges}")
         for current_id, son_id in pair_edges:
             son_layer = ir.get_layer_via_id(son_id)
             all_nodes.add(son_layer)
             all_edges.add((current_id, son_id, ""))
+            # print(f"        current_id[{current_id}] -> son_id[{son_id}]")
 
+            # print(f"            ir.get_son_ids({son_id})={ir.get_son_ids(son_id)}")
             for new_son_id in ir.get_son_ids(son_id):
                 next_ids.append((son_id, new_son_id))
-        pair_edges=next_ids
+                # print(f"            son_id[{son_id}] -> new_son_id[{new_son_id}]")
+        pair_edges=next_ids.copy()
+        next_ids=[]
 
     # Draw.
+    print(f"== Start drawing graph with node number={len(all_nodes)}, edge number={len(all_edges)}")
     draw_graph(all_nodes, all_edges, highlight_nodes, cur_layer, output=output, draw_tid=draw_tid)
 
 def visualize_all(ir:OV_IR, ignore_const=False, highlight_nodes=[], output="result_graph", draw_tid=False):
