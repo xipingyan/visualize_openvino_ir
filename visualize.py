@@ -16,7 +16,7 @@ def draw_graph(all_nodes:list[Layer], all_edges:list, highligt_nodes:list, cur_n
     for layer in all_nodes:
         show_name=layer.type+":"+layer.id+"\n"
         for output_att in layer.output:
-            show_name=show_name+str(output_att['shape'])+":"+output_att["element_type"]+"\n"
+            show_name=show_name+str(output_att['shape'])+":"+output_att["element_type"]+"\n"+layer.name+"\n"
 
         color=None
         style=None
