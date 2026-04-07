@@ -3,11 +3,19 @@ import argparse
 from read_ir import OV_IR
 from visualize import visualize
 
+
+def split_csv(raw):
+    if raw is None:
+        return []
+    return [item.strip() for item in str(raw).split(',') if item.strip()]
+
 def main():
     parser = argparse.ArgumentParser("")
     parser.add_argument("-m", "--model", help="OpenVINO IR, xml file.", required=True)
     parser.add_argument("-id", "--layer_id", help="Visualize snippet of Graph based on this layer id.")
     parser.add_argument("-name", "--layer_name", help="Visualize snippet of Graph based on this layer name.")
+    parser.add_argument("-ids", "--layer_ids", help="Visualize snippet of Graph based on multiple layer ids, split with ','.")
+    parser.add_argument("-names", "--layer_names", help="Visualize snippet of Graph based on multiple layer names, split with ','.")
     parser.add_argument("-t", "--top", type=int, default=3, help="Visualize layer number on the top of specific layer.")
     parser.add_argument("-b", "--bottom", type=int, default=1, help="Visualize layer number on the bottom of specific layer.")
     parser.add_argument("-ic", "--ignore_const", action="store_true")
@@ -19,20 +27,28 @@ def main():
     print(f"== Input parameters:")
     prefix="    "
     print(f"{prefix}model={args.model}")
+    if args.layer_names != None:
+        print(f"{prefix}layer_names={args.layer_names}")
     if args.layer_name != None:
         print(f"{prefix}layer_name={args.layer_name}")
+    if args.layer_ids != None:
+        print(f"{prefix}layer_ids={args.layer_ids}")
     if args.layer_id != None:
         print(f"{prefix}layer_id={args.layer_id}")
 
     print(f"{prefix}top={args.top}")
     print(f"{prefix}bottom={args.bottom}")
     highlight_nodes=[]
-    if args.highlight_nodes != None:
-        highlight_nodes = str(args.highlight_nodes).split(',')
+    if args.highlight_nodes is not None:
+        highlight_nodes = split_csv(args.highlight_nodes)
+
+    layer_ids = split_csv(args.layer_ids)
+    layer_names = split_csv(args.layer_names)
 
     ir = OV_IR(xml_fn=args.model)
 
     visualize(ir, layer_name=args.layer_name, layer_id=args.layer_id,
+              layer_names=layer_names, layer_ids=layer_ids,
               top=args.top, bottom=args.bottom, ignore_const=args.ignore_const, 
               highlight_nodes=highlight_nodes, output=args.output)
 

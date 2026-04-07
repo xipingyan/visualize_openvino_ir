@@ -18,6 +18,12 @@ Netron can't visualize large model(OpenVINO IR), just customize a script to disp
     <!-- Show subgraph based on id -->
     python main.py -m $model -id $layer_id  --top 10 --bottom 1 --ignore_const -highlight MatMul,Slice,FullyConnected,Split
 
+    <!-- Show subgraph based on multiple ids -->
+    python main.py -m $model -ids 123,456,789 --top 5 --bottom 2 --ignore_const
+
+    <!-- Show subgraph based on multiple names -->
+    python main.py -m $model -names layer_a,layer_b --top 5 --bottom 2 --ignore_const
+
     <!-- Show graph -->
     python main.py -m $model
 
